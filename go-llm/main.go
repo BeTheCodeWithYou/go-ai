@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/teilomillet/gollm"
@@ -34,13 +36,39 @@ func main() {
 
 	ctx := context.Background()
 
-	prompt := gollm.NewPrompt("what is golang?")
+	fmt.Println("a ...any")
+	scanner := bufio.NewScanner(os.Stdin)
+	for {
+
+		fmt.Print("🧑: ")
+		if !scanner.Scan() {
+			break
+		}
+
+		input := scanner.Text()
+		if strings.ToLower(input) == "" {
+			break
+		}
+		fmt.Print("\n🤖: ")
+
+		if run(llm, ctx, input) != nil {
+			log.Fatalln(err)
+		}
+		fmt.Print("\n\n")
+	}
+
+}
+
+func run(llm gollm.LLM, ctx context.Context, input string) error {
+
+	prompt := gollm.NewPrompt(input)
 
 	response, err := llm.Generate(ctx, prompt)
 	if err != nil {
 		log.Fatalf("Failed to generate response %v", err)
+		return err
 	}
 
 	fmt.Printf("Response:\n%s\n", response)
-
+	return nil
 }
